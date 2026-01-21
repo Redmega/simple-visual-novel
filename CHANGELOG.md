@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/Redmega/simple-visual-novel/compare/v0.2.0...v0.2.1) (2026-01-21)
+
+
+### Bug Fixes
+
+* add environment to release job ([b410b21](https://github.com/Redmega/simple-visual-novel/commit/b410b21933dd0ad4ed99109a1a3e4886ba7572ca))
+
 ## [0.2.0](https://github.com/Redmega/simple-visual-novel/compare/v0.1.1...v0.2.0) (2026-01-21)
 
 
