@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.3](https://github.com/Redmega/simple-visual-novel/compare/v0.2.2...v0.2.3) (2026-01-21)
+
+
+### Bug Fixes
+
+* update package.json version, change release-please mode to node ([7a5bd93](https://github.com/Redmega/simple-visual-novel/commit/7a5bd934749156d3a31f42bf4039e396fbfb9364))
+
 ## [0.2.2](https://github.com/Redmega/simple-visual-novel/compare/v0.2.1...v0.2.2) (2026-01-21)
 
 
