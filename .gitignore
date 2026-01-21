@@ -6,3 +6,6 @@ dist/
 .idea/
 coverage/
 .npmrc
+example/simple-visual-novel.js
+docs/
+PUBLISHING.md

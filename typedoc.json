@@ -1,0 +1,9 @@
+{
+  "$schema": "https://typedoc-plugin-markdown.org/schema.json",
+  "entryPoints": ["src/*"],
+  "name": "",
+  "plugin": ["typedoc-rhineai-theme"],
+  "gitRevision": "main",
+  "includeHierarchySummary": true,
+  "entryPointStrategy": "expand"
+}

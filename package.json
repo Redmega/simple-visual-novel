@@ -26,6 +26,7 @@
   },
   "scripts": {
     "build": "tsc && npm run build:browser && npm run build:min",
+    "docs": "typedoc",
     "build:browser": "esbuild src/index.ts --bundle --format=iife --global-name=SimpleVN --outfile=dist/simple-visual-novel.js --platform=browser --target=es2020 --keep-names --legal-comments=inline",
     "build:min": "esbuild src/index.ts --bundle --format=iife --global-name=SimpleVN --outfile=dist/simple-visual-novel.min.js --platform=browser --target=es2020 --minify --keep-names --legal-comments=none",
     "example": "npm run build:browser && cp dist/simple-visual-novel.js example/simple-visual-novel.js && serve example",
@@ -38,6 +39,8 @@
     "esbuild": "^0.27.2",
     "jsdom": "^27.4.0",
     "serve": "^14.2.5",
+    "typedoc": "^0.28.16",
+    "typedoc-rhineai-theme": "^1.2.0",
     "typescript": "^5.9.3",
     "vitest": "^4.0.17"
   }

@@ -1,4 +1,13 @@
-// Scene action types
+/**
+ * Types of actions that can occur within a scene.
+ *
+ * - `"dialogue"` - Display character dialogue with optional text effects
+ * - `"show"` - Show a character on screen with optional position and size
+ * - `"hide"` - Hide a character from the screen
+ * - `"setImage"` - Change a character's sprite/image
+ *
+ * @typedef {string} SceneActionType
+ */
 export type SceneActionType = "dialogue" | "show" | "hide" | "setImage";
 
 /**
@@ -37,6 +46,24 @@ export interface Size {
   height?: number | string;
 }
 
+/**
+ * Represents a single action within a scene, such as dialogue or character visibility changes.
+ *
+ * The `type` field determines which other fields are relevant:
+ * - For `"dialogue"`: `character`, `text`, and optionally `options` are used
+ * - For `"show"`: `character`, and optionally `position` and `size` are used
+ * - For `"hide"`: only `character` is used
+ * - For `"setImage"`: `character` and `image` are used
+ *
+ * @interface SceneAction
+ * @property {SceneActionType} type - The type of action to perform
+ * @property {Character} [character] - The character involved in this action
+ * @property {string} [text] - Dialogue text (for "dialogue" actions)
+ * @property {DialogueOptions} [options] - Display options for dialogue
+ * @property {Position} [position] - Character position (for "show" actions)
+ * @property {Size} [size] - Character size (for "show" actions)
+ * @property {string} [image] - New image URL (for "setImage" actions)
+ */
 export interface SceneAction {
   type: SceneActionType;
   character?: Character;
@@ -58,7 +85,25 @@ export interface SceneOptions {
 
 /**
  * Represents a character in the visual novel.
- * @class
+ *
+ * Characters are the primary actors in a visual novel. They can speak dialogue,
+ * be shown or hidden on screen, and have their appearance changed dynamically.
+ *
+ * Characters must be added to a scene before they can perform actions like
+ * speaking dialogue or being shown/hidden.
+ *
+ * @class Character
+ * @example
+ * ```typescript
+ * // Create a character with a sprite
+ * const alice = new Character("Alice", "alice.png");
+ *
+ * // Add to a scene and use
+ * scene.add(alice, { position: "left" });
+ * alice.say("Hello!", { effect: "typewriter" });
+ * alice.image = "alice-happy.png"; // Change expression
+ * alice.hide();
+ * ```
  */
 export class Character {
   private _name: string;
@@ -71,7 +116,7 @@ export class Character {
    * Creates a new Character instance.
    * @param {string} name - The character's name
    * @param {string} [image] - Optional image/sprite URL for the character
-   * @constructor
+   *
    */
   constructor(name: string, image?: string) {
     this._name = name;
@@ -142,6 +187,15 @@ export class Character {
     this._size = value;
   }
 
+  /**
+   * Sets the current scene for this character.
+   *
+   * This is called automatically when a character is added to a scene via `scene.add()`.
+   * It enables the character to queue actions in that scene.
+   *
+   * @param {Scene|null} scene - The scene to associate with this character, or null to disassociate
+   * @internal
+   */
   set currentScene(scene: Scene | null) {
     this._currentScene = scene;
   }
@@ -203,12 +257,31 @@ export class Character {
       character: this,
     });
   }
-
 }
 
 /**
  * Represents a scene in the visual novel.
- * @class
+ *
+ * A scene is a container for a sequence of actions (dialogue, character visibility, etc.)
+ * that occur in a specific location. Each scene can have a background image and contains
+ * characters that can interact within it.
+ *
+ * Scenes are added to a Script and played in the order they are added.
+ *
+ * @class Scene
+ * @example
+ * ```typescript
+ * // Create a scene with a background
+ * const parkScene = new Scene("park", { background: "park.png" });
+ *
+ * // Add characters and dialogue
+ * const alice = new Character("Alice", "alice.png");
+ * parkScene.add(alice, { position: "center" });
+ * alice.say("What a beautiful day!");
+ *
+ * // Add to script
+ * script.addScene(parkScene);
+ * ```
  */
 export class Scene {
   private _id: string;
@@ -221,7 +294,7 @@ export class Scene {
    * @param {string} id - Unique identifier for the scene
    * @param {SceneOptions} [options={}] - Scene configuration options
    * @param {string} [options.background] - Background image URL
-   * @constructor
+   *
    */
   constructor(id: string, options: SceneOptions = {}) {
     this._id = id;
@@ -274,6 +347,25 @@ export class Scene {
     });
   }
 
+  /**
+   * Adds an action to the scene's action queue.
+   *
+   * Actions are processed in the order they are added. This method is typically
+   * called internally by character methods like `say()`, `show()`, and `hide()`,
+   * but can be called directly for advanced use cases.
+   *
+   * @param {SceneAction} action - The action to add to the scene
+   * @example
+   * ```typescript
+   * // Manually add a dialogue action
+   * scene.addAction({
+   *   type: "dialogue",
+   *   character: alice,
+   *   text: "Hello!",
+   *   options: { effect: "typewriter" }
+   * });
+   * ```
+   */
   addAction(action: SceneAction): void {
     this._actions.push(action);
   }
@@ -281,7 +373,27 @@ export class Scene {
 
 /**
  * Manages the complete story script with all scenes.
- * @class
+ *
+ * A Script is the top-level container for a visual novel story. It holds all scenes
+ * in order and provides methods to access them by ID or index.
+ *
+ * Scenes are played in the order they are added to the script.
+ *
+ * @class Script
+ * @example
+ * ```typescript
+ * const script = new Script();
+ *
+ * const scene1 = new Scene("intro", { background: "title.png" });
+ * const scene2 = new Scene("chapter1", { background: "forest.png" });
+ *
+ * script.addScene(scene1);
+ * script.addScene(scene2);
+ *
+ * // Access scenes
+ * const intro = script.getScene("intro");
+ * const firstScene = script.getSceneByIndex(0);
+ * ```
  */
 export class Script {
   private _scenes: Scene[] = [];
@@ -336,7 +448,17 @@ export class Script {
   }
 }
 
-// Game state interface
+/**
+ * Represents the serializable state of the game.
+ *
+ * This interface defines the structure of game state that can be saved and restored.
+ * It includes game variables, the current scene, and navigation history.
+ *
+ * @interface GameState
+ * @property {Record<string, any>} variables - Custom game variables (flags, counters, etc.)
+ * @property {string|null} _currentSceneId - The ID of the currently active scene
+ * @property {string[]} sceneHistory - Array of previously visited scene IDs for back navigation
+ */
 export interface GameState {
   variables: Record<string, any>;
   _currentSceneId: string | null;

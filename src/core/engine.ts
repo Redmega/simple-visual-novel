@@ -3,13 +3,35 @@ import { StateManager } from "./state.js";
 import type { RendererOptions } from "../renderer/renderer.js";
 import { DOMRenderer } from "../renderer/renderer.js";
 
+/**
+ * Types of events emitted by the VNEngine.
+ *
+ * - `"sceneChange"` - Emitted when the current scene changes (includes `sceneId` in data)
+ * - `"variableChange"` - Emitted when a game variable is set (includes `key` and `value` in data)
+ *
+ * @typedef {string} EngineEventType
+ */
 export type EngineEventType = "sceneChange" | "variableChange";
 
+/**
+ * Event object passed to engine event listeners.
+ *
+ * @interface EngineEvent
+ * @property {EngineEventType} type - The type of event that occurred
+ * @property {any} [data] - Event-specific data (e.g., `{ sceneId }` for scene changes)
+ */
 export interface EngineEvent {
   type: EngineEventType;
   data?: any;
 }
 
+/**
+ * Callback function type for engine event listeners.
+ *
+ * @callback EngineEventListener
+ * @param {EngineEvent} event - The event object containing type and data
+ * @returns {void}
+ */
 export type EngineEventListener = (event: EngineEvent) => void;
 
 /**
@@ -30,7 +52,38 @@ export interface VNEngineOptions {
 
 /**
  * Main engine class for running visual novels.
- * @class
+ *
+ * The VNEngine orchestrates the visual novel experience by managing the script,
+ * game state, rendering, and event system. It provides methods for scene navigation,
+ * variable management, and event handling.
+ *
+ * When created in a browser environment, it automatically instantiates a DOMRenderer
+ * to display the visual novel.
+ *
+ * @class VNEngine
+ * @example
+ * ```typescript
+ * const script = new Script();
+ * // ... add scenes to script ...
+ *
+ * const engine = new VNEngine({
+ *   script,
+ *   container: "#game-container",
+ *   startScene: "intro",
+ *   renderer: {
+ *     assetsDirectory: "assets",
+ *     typewriterSpeed: 50
+ *   }
+ * });
+ *
+ * // Listen for events
+ * engine.on("sceneChange", (event) => {
+ *   console.log("Scene changed to:", event.data.sceneId);
+ * });
+ *
+ * // Use game variables
+ * engine.setVariable("playerName", "Alex");
+ * ```
  */
 export class VNEngine {
   private _script: Script;
@@ -42,7 +95,7 @@ export class VNEngine {
    * Creates a new VNEngine instance.
    * @param {VNEngineOptions} options - Engine configuration options
    * @throws {Error} If the start scene is not found in the script
-   * @constructor
+   *
    */
   constructor(options: VNEngineOptions) {
     this._script = options.script;
@@ -51,13 +104,20 @@ export class VNEngine {
       throw new Error(`Scene with id "${options.startScene}" not found`);
     }
     this._stateManager = new StateManager(options.startScene);
-    
+
     // Create renderer if we're in a browser environment
     if (typeof document !== "undefined") {
-      this._renderer = new DOMRenderer(options.container, this, options.renderer || {});
+      this._renderer = new DOMRenderer(
+        options.container,
+        this,
+        options.renderer || {}
+      );
     }
-    
-    this.emitEvent({ type: "sceneChange", data: { sceneId: options.startScene } });
+
+    this.emitEvent({
+      type: "sceneChange",
+      data: { sceneId: options.startScene },
+    });
   }
 
   /**
@@ -142,7 +202,7 @@ export class VNEngine {
    * @type {Object<string, *>}
    */
   get allVariables(): Record<string, any> {
-    return this._stateManager.allVariables
+    return this._stateManager.allVariables;
   }
 
   /**
@@ -185,6 +245,12 @@ export class VNEngine {
     }
   }
 
+  /**
+   * Emits an event to all registered listeners for that event type.
+   *
+   * @param {EngineEvent} event - The event to emit
+   * @internal
+   */
   private emitEvent(event: EngineEvent): void {
     const listeners = this.listeners.get(event.type);
     if (listeners) {

@@ -4,18 +4,52 @@ import { typewriter, fadeIn } from "./effects.js";
 
 /**
  * Options for configuring the DOM renderer.
- * @typedef {Object} RendererOptions
- * @property {number} [typewriterSpeed=50] - Characters per second for typewriter effect
- * @property {string} [assetsDirectory] - Base directory for asset paths (e.g., "assets", "/assets", "./assets")
+ *
+ * @interface RendererOptions
+ * @property {number} [typewriterSpeed=50] - Characters per second for typewriter effect.
+ *   Higher values mean faster typing. Default is 50 characters per second.
+ * @property {string} [assetsDirectory] - Base directory for asset paths.
+ *   When set, relative paths like "character.png" become "assets/character.png".
+ *   Absolute paths (starting with "/", "http://", or "https://") are not modified.
+ *
+ * @example
+ * ```typescript
+ * const options: RendererOptions = {
+ *   typewriterSpeed: 75,        // Faster typing
+ *   assetsDirectory: "assets"   // Assets in ./assets/ folder
+ * };
+ * ```
  */
 export interface RendererOptions {
-  typewriterSpeed?: number; // characters per second
-  assetsDirectory?: string; // base directory for asset paths
+  /** Characters per second for typewriter effect (default: 50) */
+  typewriterSpeed?: number;
+  /** Base directory for asset paths (e.g., "assets", "/assets", "./assets") */
+  assetsDirectory?: string;
 }
 
 /**
  * Renders the visual novel to the DOM.
- * @class
+ *
+ * The DOMRenderer handles all visual presentation of the visual novel, including:
+ * - Background images for scenes
+ * - Character sprites with positioning and sizing
+ * - Dialogue display with text effects (typewriter, fade)
+ * - User interaction (clicking to advance dialogue)
+ *
+ * The renderer creates a layered DOM structure within the provided container:
+ * - Background layer (`.vn-background-layer`)
+ * - Character layer (`.vn-character-layer`)
+ * - Dialogue box (`.vn-dialogue-box`) containing speaker name and text
+ *
+ * @class DOMRenderer
+ * @example
+ * ```typescript
+ * // Usually created automatically by VNEngine, but can be used directly:
+ * const renderer = new DOMRenderer("#game-container", engine, {
+ *   typewriterSpeed: 50,
+ *   assetsDirectory: "assets"
+ * });
+ * ```
  */
 export class DOMRenderer {
   private container: HTMLElement;
@@ -37,7 +71,7 @@ export class DOMRenderer {
    * @param {VNEngine} engine - The VNEngine instance
    * @param {RendererOptions} [options={}] - Renderer configuration options
    * @throws {Error} If container element is not found
-   * @constructor
+   *
    */
   constructor(
     container: string | HTMLElement,
@@ -63,6 +97,16 @@ export class DOMRenderer {
     // Don't call renderCurrentScene() here - let the engine's sceneChange event trigger it
   }
 
+  /**
+   * Creates and appends the DOM structure for the visual novel.
+   *
+   * Creates three main layers:
+   * - Background layer for scene backgrounds
+   * - Character layer for character sprites
+   * - Dialogue box with speaker name and dialogue text
+   *
+   * @internal
+   */
   private setupDOM(): void {
     // Create layers
     this.backgroundLayer = document.createElement("div");
@@ -88,6 +132,14 @@ export class DOMRenderer {
     this.container.appendChild(this.dialogueBox);
   }
 
+  /**
+   * Sets up event listeners for engine events and user interaction.
+   *
+   * - Listens for scene changes to re-render when the scene changes
+   * - Handles click events on the dialogue box to advance dialogue or cancel animations
+   *
+   * @internal
+   */
   private setupEventListeners(): void {
     // Listen for scene changes
     this.engine.on("sceneChange", async () => {
@@ -113,6 +165,18 @@ export class DOMRenderer {
     });
   }
 
+  /**
+   * Renders the current scene, updating background and starting action processing.
+   *
+   * This method:
+   * 1. Resets the action index to the beginning
+   * 2. Updates the background image if specified
+   * 3. Clears all character elements from the previous scene
+   * 4. Begins processing actions from the start
+   *
+   * @returns {Promise<void>} Resolves when initial rendering is complete
+   * @internal
+   */
   private async renderCurrentScene(): Promise<void> {
     const scene = this.engine.currentScene;
     if (!scene) {
@@ -139,6 +203,15 @@ export class DOMRenderer {
     await this.processActions();
   }
 
+  /**
+   * Processes the next action in the current scene's action queue.
+   *
+   * This method handles the action processing loop, checking if there are
+   * more actions to process and delegating to the appropriate handler.
+   *
+   * @returns {Promise<void>} Resolves when the current action is processed
+   * @internal
+   */
   private async processActions(): Promise<void> {
     const scene = this.engine.currentScene;
     if (!scene) {
@@ -158,6 +231,22 @@ export class DOMRenderer {
     this.isProcessing = false;
   }
 
+  /**
+   * Processes a single scene action based on its type.
+   *
+   * Delegates to the appropriate handler method:
+   * - `"show"` -> `showCharacter()`
+   * - `"hide"` -> `hideCharacter()`
+   * - `"setImage"` -> `setCharacterImage()`
+   * - `"dialogue"` -> `displayDialogue()`
+   *
+   * Non-blocking actions (show, hide, setImage) automatically advance to the next action.
+   * Dialogue actions wait for user interaction before advancing.
+   *
+   * @param {SceneAction} action - The action to process
+   * @returns {Promise<void>} Resolves when the action is complete
+   * @internal
+   */
   private async processAction(action: SceneAction): Promise<void> {
     switch (action.type) {
       case "show":
@@ -193,6 +282,18 @@ export class DOMRenderer {
     }
   }
 
+  /**
+   * Shows a character on screen with optional position and size.
+   *
+   * If the character doesn't have a DOM element yet, one is created.
+   * The character is then positioned and sized according to the parameters,
+   * and faded in with an animation.
+   *
+   * @param {Character} character - The character to show
+   * @param {Position} [position] - Optional position (named or coordinate)
+   * @param {Size} [size] - Optional size (normalized, pixel, or percentage)
+   * @internal
+   */
   private showCharacter(
     character: Character,
     position?: Position,
@@ -251,6 +352,12 @@ export class DOMRenderer {
     fadeIn(element);
   }
 
+  /**
+   * Hides a character from the screen by setting display to none.
+   *
+   * @param {Character} character - The character to hide
+   * @internal
+   */
   private hideCharacter(character: Character): void {
     const element = this.characterElements.get(character);
     if (element) {
@@ -258,6 +365,19 @@ export class DOMRenderer {
     }
   }
 
+  /**
+   * Updates a character's displayed sprite/image.
+   *
+   * If the character's DOM element already has an image, the src is updated.
+   * If no image element exists, one is created and appended.
+   *
+   * Note: The character's internal image property is already updated by the
+   * setter that queued this action; this method only updates the DOM.
+   *
+   * @param {Character} character - The character whose image to update
+   * @param {string} image - The new image URL
+   * @internal
+   */
   private setCharacterImage(character: Character, image: string): void {
     // Note: character.image is already updated by the setter that queued this action
     // We only need to update the DOM element here
@@ -280,6 +400,24 @@ export class DOMRenderer {
     }
   }
 
+  /**
+   * Displays dialogue text with an optional text effect.
+   *
+   * Sets the speaker name and displays the dialogue text with the specified effect:
+   * - `"typewriter"` - Types text character by character
+   * - `"fade"` - Fades the text in from transparent
+   * - No effect - Displays text immediately
+   *
+   * During animation, the animation can be cancelled by clicking, which
+   * immediately shows the full text.
+   *
+   * @param {Character} character - The character speaking
+   * @param {string} text - The dialogue text to display
+   * @param {Object} [options] - Display options
+   * @param {("fade"|"typewriter")} [options.effect] - Text effect to apply
+   * @returns {Promise<void>} Resolves when the text is fully displayed
+   * @internal
+   */
   private async displayDialogue(
     character: Character,
     text: string,
@@ -313,6 +451,16 @@ export class DOMRenderer {
     }
   }
 
+  /**
+   * Advances to the next action in the scene or moves to the next scene.
+   *
+   * If there are more actions in the current scene, processes the next one.
+   * If all actions are complete, attempts to move to the next scene.
+   * If there are no more scenes, clears the dialogue display.
+   *
+   * @returns {Promise<void>} Resolves when the next action is processed
+   * @internal
+   */
   private async nextAction(): Promise<void> {
     const scene = this.engine.currentScene;
     if (!scene) {
@@ -340,7 +488,7 @@ export class DOMRenderer {
    * Resolves an asset path using the configured assets directory.
    * @param {string} path - The asset path (relative or absolute)
    * @returns {string} The resolved asset path
-   * @private
+   * @internal
    */
   private resolveAssetPath(path: string): string {
     // If path is already absolute (starts with http://, https://, or /), return as-is
@@ -364,7 +512,16 @@ export class DOMRenderer {
     return `${assetsDir}/${path}`;
   }
 
-  /** Named position lookup table */
+  /**
+   * Lookup table mapping named positions to CSS coordinate values.
+   *
+   * Named positions provide convenient presets for common character placements:
+   * - Horizontal: `"far-left"` (10%), `"left"` (25%), `"center"` (50%), `"right"` (75%), `"far-right"` (90%)
+   * - Vertical: `"top"`, `"bottom"`
+   * - Combined: `"top-left"`, `"top-center"`, `"top-right"`, `"bottom-left"`, `"bottom-center"`, `"bottom-right"`
+   *
+   * @internal
+   */
   private static readonly NAMED_POSITIONS: Record<
     string,
     { x: string; y: string }
@@ -391,7 +548,7 @@ export class DOMRenderer {
    * Resolves a position to CSS values.
    * @param {Position} position - The position to resolve
    * @returns {{x: string, y: string}} Resolved x and y CSS values
-   * @private
+   * @internal
    */
   private resolvePosition(position: Position): { x: string; y: string } {
     let newPosition;
@@ -428,7 +585,7 @@ export class DOMRenderer {
    * Resolves a size to CSS values.
    * @param {Size} size - The size to resolve
    * @returns {{width?: string, height?: string}} Resolved width and height CSS values
-   * @private
+   * @internal
    */
   private resolveSize(size: Size): { width?: string; height?: string } {
     // Convert number to percentage, pass string through, undefined stays undefined
