@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.2](https://github.com/Redmega/simple-visual-novel/compare/v0.2.1...v0.2.2) (2026-01-21)
+
+
+### Bug Fixes
+
+* remove major/minor tags ([2fb2176](https://github.com/Redmega/simple-visual-novel/commit/2fb217613a0b70a3d97ceac2fb92a9203d159448))
+
 ## [0.2.1](https://github.com/Redmega/simple-visual-novel/compare/v0.2.0...v0.2.1) (2026-01-21)
 
 
