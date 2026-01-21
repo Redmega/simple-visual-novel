@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/Redmega/simple-visual-novel/compare/v0.1.0...v0.1.1) (2026-01-21)
+
+
+### Bug Fixes
+
+* release pipeline ([eca2a3f](https://github.com/Redmega/simple-visual-novel/commit/eca2a3fb9d8253ed40eadde3cf1367beebb5b8c4))
+
 ## [0.1.0](https://github.com/Redmega/simple-visual-novel/compare/v0.0.2...v0.1.0) (2026-01-21)
 
 
