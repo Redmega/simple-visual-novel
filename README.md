@@ -10,7 +10,7 @@ A minimal TypeScript visual novel engine with vanilla DOM rendering, supporting 
 
 - **Class-based Script API** - Build stories using a fluent, type-safe API
 - **Dialogue System** - Per-dialogue effects (fade, typewriter)
-- **Character Management** - Show/hide characters dynamically
+- **Character Management** - Show/hide characters dynamically, change images mid-scene
 - **Scene Navigation** - Automatic progression through scenes
 - **Game State** - Variable management for flags and counters
 - **Event System** - Listen to scene changes and variable updates
@@ -28,6 +28,10 @@ npm install simple-visual-novel
 A browser bundle is available via unpkg:
 
 https://unpkg.com/simple-visual-novel@latest
+
+Of a minified version:
+
+https://unpkg.com/simple-visual-novel@latest/dist/simple-visual-novel.min.js
 
 Or build it yourself:
 ```bash
@@ -160,6 +164,23 @@ Dialogue can have optional effects:
 - `{ effect: "typewriter" }` - Character-by-character animation
 - `{ effect: "fade" }` - Fade in animation
 - No effect - Display immediately
+
+## Changing Character Images
+
+Characters can have their images changed dynamically during a scene by setting the `image` property. This is useful for showing different character expressions or outfits:
+
+```typescript
+const character = new Character("Alice", "alice-neutral.png");
+
+scene.add(character);
+character.say("Hello!");
+character.image = "alice-happy.png"; // Change to happy expression
+character.say("I'm so happy to see you!");
+character.image = "alice-surprised.png"; // Change to surprised expression
+character.say("Wait, what's that?!");
+```
+
+When the character is in a scene, setting `image` automatically queues an action to update the displayed sprite. If the character is not yet in a scene, it just updates the internal state.
 
 ## Character Positioning and Sizing
 

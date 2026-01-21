@@ -174,6 +174,13 @@ export class DOMRenderer {
         }
         break;
 
+      case "setImage":
+        if (action.character && action.image) {
+          this.setCharacterImage(action.character, action.image);
+          return this.nextAction();
+        }
+        break;
+
       case "dialogue":
         if (action.character && action.text) {
           return this.displayDialogue(
@@ -248,6 +255,28 @@ export class DOMRenderer {
     const element = this.characterElements.get(character);
     if (element) {
       element.style.display = "none";
+    }
+  }
+
+  private setCharacterImage(character: Character, image: string): void {
+    // Note: character.image is already updated by the setter that queued this action
+    // We only need to update the DOM element here
+    const element = this.characterElements.get(character);
+    if (element) {
+      const img = element.querySelector("img");
+      if (img) {
+        // Update existing image element
+        img.src = this.resolveAssetPath(image);
+      } else {
+        // Create new image element if one doesn't exist
+        const newImg = document.createElement("img");
+        newImg.src = this.resolveAssetPath(image);
+        newImg.alt = character.name;
+        newImg.style.width = "100%";
+        newImg.style.height = "100%";
+        newImg.style.objectFit = "contain";
+        element.appendChild(newImg);
+      }
     }
   }
 

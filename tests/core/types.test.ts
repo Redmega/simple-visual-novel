@@ -24,6 +24,17 @@ describe("Character", () => {
     it("should create character without image", () => {
       expect(character.image).toBeUndefined();
     });
+
+    it("should allow setting image directly via setter", () => {
+      character.image = "new-image.png";
+      expect(character.image).toBe("new-image.png");
+    });
+
+    it("should allow clearing image via setter", () => {
+      const characterWithImage = new Character("Bob", "bob.png");
+      characterWithImage.image = undefined;
+      expect(characterWithImage.image).toBeUndefined();
+    });
   });
 
   describe("scene management", () => {
@@ -53,6 +64,12 @@ describe("Character", () => {
       expect(() => {
         character.hide();
       }).toThrow('Character "Alice" must be added to a scene before hiding');
+    });
+
+    it("should not queue action when setting image without being in a scene", () => {
+      // Setting image without a scene should just update internal state, not throw
+      character.image = "new-image.png";
+      expect(character.image).toBe("new-image.png");
     });
   });
 
@@ -86,6 +103,15 @@ describe("Character", () => {
       const actions = scene.actions;
       const hideAction = actions.find(a => a.type === "hide" && a.character === character);
       expect(hideAction).toBeDefined();
+    });
+
+    it("should queue setImage action when setting image property", () => {
+      character.image = "new-image.png";
+      
+      const actions = scene.actions;
+      const setImageAction = actions.find(a => a.type === "setImage" && a.character === character);
+      expect(setImageAction).toBeDefined();
+      expect(setImageAction?.image).toBe("new-image.png");
     });
   });
 

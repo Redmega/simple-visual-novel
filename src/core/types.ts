@@ -1,5 +1,5 @@
 // Scene action types
-export type SceneActionType = "dialogue" | "show" | "hide";
+export type SceneActionType = "dialogue" | "show" | "hide" | "setImage";
 
 /**
  * Options for dialogue display.
@@ -44,6 +44,7 @@ export interface SceneAction {
   options?: DialogueOptions;
   position?: Position;
   size?: Size;
+  image?: string;
 }
 
 /**
@@ -91,6 +92,22 @@ export class Character {
    */
   get image(): string | undefined {
     return this._image;
+  }
+
+  /**
+   * Sets the character's image/sprite URL.
+   * If the character is in a scene, this queues an action to update the displayed image.
+   * @param {string|undefined} value - The image URL to set
+   */
+  set image(value: string | undefined) {
+    this._image = value;
+    if (this._currentScene && value !== undefined) {
+      this._currentScene.addAction({
+        type: "setImage",
+        character: this,
+        image: value,
+      });
+    }
   }
 
   /**
@@ -186,6 +203,7 @@ export class Character {
       character: this,
     });
   }
+
 }
 
 /**

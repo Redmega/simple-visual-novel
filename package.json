@@ -21,7 +21,7 @@
     "url": "https://github.com/Redmega/simple-visual-novel/issues"
   },
   "exports": {
-    "unpkg": "./dist/simple-visual-novel.min.js",
+    "unpkg": "./dist/simple-visual-novel.js",
     "default": "./dist/index.js"
   },
   "scripts": {

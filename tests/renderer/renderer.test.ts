@@ -422,6 +422,87 @@ describe("DOMRenderer", () => {
       expect(img).toBeNull();
     });
 
+    it("should update character image when image property is set", async () => {
+      container.innerHTML = "";
+
+      const testScript = new Script();
+      const testScene = new Scene("test-scene");
+      const character = new Character("TestCharacter", "original.png");
+      testScene.add(character);
+      character.image = "updated.png";
+      testScript.addScene(testScene);
+
+      const testEngine = new VNEngine({
+        script: testScript,
+        container: container,
+        startScene: "test-scene",
+      });
+
+      await vi.runAllTimersAsync();
+
+      const characterElement = container.querySelector(
+        '[data-character-name="TestCharacter"]'
+      ) as HTMLElement;
+      const img = characterElement.querySelector("img") as HTMLImageElement;
+      expect(img.src).toContain("updated.png");
+      expect(character.image).toBe("updated.png");
+    });
+
+    it("should add image element when image is set on character without initial image", async () => {
+      container.innerHTML = "";
+
+      const testScript = new Script();
+      const testScene = new Scene("test-scene");
+      const character = new Character("TestCharacter"); // No initial image
+      testScene.add(character);
+      character.image = "new-image.png";
+      testScript.addScene(testScene);
+
+      const testEngine = new VNEngine({
+        script: testScript,
+        container: container,
+        startScene: "test-scene",
+      });
+
+      await vi.runAllTimersAsync();
+
+      const characterElement = container.querySelector(
+        '[data-character-name="TestCharacter"]'
+      ) as HTMLElement;
+      const img = characterElement.querySelector("img") as HTMLImageElement;
+      expect(img).toBeDefined();
+      expect(img.src).toContain("new-image.png");
+      expect(img.alt).toBe("TestCharacter");
+    });
+
+    it("should resolve image path with assets directory when image is set", async () => {
+      container.innerHTML = "";
+
+      const testScript = new Script();
+      const testScene = new Scene("test-scene");
+      const character = new Character("TestCharacter", "original.png");
+      testScene.add(character);
+      character.image = "updated.png";
+      testScript.addScene(testScene);
+
+      const testEngine = new VNEngine({
+        script: testScript,
+        container: container,
+        startScene: "test-scene",
+        renderer: {
+          assetsDirectory: "assets",
+        },
+      });
+
+      await vi.runAllTimersAsync();
+
+      const characterElement = container.querySelector(
+        '[data-character-name="TestCharacter"]'
+      ) as HTMLElement;
+      const img = characterElement.querySelector("img") as HTMLImageElement;
+      expect(img.src).toContain("assets/updated.png");
+    });
+
     it("should resolve character image path with assets directory", async () => {
       container.innerHTML = "";
 
