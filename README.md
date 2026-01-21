@@ -3,8 +3,14 @@
 A minimal TypeScript visual novel engine with vanilla DOM rendering, supporting dialogue, character visibility, and scene transitions.
 
 [![](https://img.shields.io/npm/v/simple-visual-novel
-)](https://www.npmjs.com/package/simple-visual-novel) ![](https://img.shields.io/depfu/dependencies/github/Redmega%2Fsimple-visual-novel
-)
+)](https://www.npmjs.com/package/simple-visual-novel) [![Dependent repos (via libraries.io)](https://img.shields.io/librariesio/dependent-repos/npm/simple-visual-novel?label=dependencies)
+](https://www.npmjs.com/package/simple-visual-novel?activeTab=dependencies) [![Read the Docs](https://img.shields.io/readthedocs/simple-visual-novel)
+](https://simple-visual-novel.readthedocs.io/en/latest)
+
+## Docs
+
+The docs can be found at https://simple-visual-novel.readthedocs.io/en/latest
+
 
 ## Features
 
