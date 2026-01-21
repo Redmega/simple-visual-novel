@@ -6,11 +6,12 @@ build:
     nodejs: "24"
   jobs:
     install:
-      # Install dependencies
       - npm ci
     build:
-      # Build the site
-      - npm run docs
+      html:
+        # Build the site
+        - npm run docs
+    post_build:
       # Copy generated files into Read the Docs directory
       - mkdir --parents $READTHEDOCS_OUTPUT/html/
       - cp --verbose --recursive docs/* $READTHEDOCS_OUTPUT/html/
