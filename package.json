@@ -1,0 +1,44 @@
+{
+  "name": "simple-visual-novel",
+  "version": "0.0.1",
+  "type": "module",
+  "author": "Redmega",
+  "description": "A minimal TypeScript visual novel engine",
+  "keywords": [
+    "visual-novel",
+    "typescript",
+    "game-engine",
+    "interactive-fiction",
+    "storytelling"
+  ],
+  "license": "Unlicense",
+  "homepage": "https://github.com/Redmega/simple-visual-novel",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Redmega/simple-visual-novel.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Redmega/simple-visual-novel/issues"
+  },
+  "exports": {
+    "unpkg": "./dist/simple-visual-novel.min.js",
+    "default": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc && npm run build:browser && npm run build:min",
+    "build:browser": "esbuild src/index.ts --bundle --format=iife --global-name=SimpleVN --outfile=dist/simple-visual-novel.js --platform=browser --target=es2020 --keep-names --legal-comments=inline",
+    "build:min": "esbuild src/index.ts --bundle --format=iife --global-name=SimpleVN --outfile=dist/simple-visual-novel.min.js --platform=browser --target=es2020 --minify --keep-names --legal-comments=none",
+    "example": "npm run build:browser && cp dist/simple-visual-novel.js example/simple-visual-novel.js && serve example",
+    "test": "vitest",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.9",
+    "@vitest/coverage-v8": "4.0.17",
+    "esbuild": "^0.27.2",
+    "jsdom": "^27.4.0",
+    "serve": "^14.2.5",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.17"
+  }
+}
