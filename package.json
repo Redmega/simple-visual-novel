@@ -1,6 +1,6 @@
 {
   "name": "simple-visual-novel",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "type": "module",
   "author": "Redmega",
   "description": "A minimal TypeScript visual novel engine",
